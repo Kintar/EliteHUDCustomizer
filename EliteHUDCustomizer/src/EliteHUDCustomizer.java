@@ -16,13 +16,16 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import javax.swing.JOptionPane;
 import java.util.Scanner;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
+import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
 
 
@@ -47,7 +50,7 @@ public class EliteHUDCustomizer extends Application {;
         
         // initialize drop down menu
         ComboBox comboBox = new ComboBox(comboBoxData);
-        comboBoxData = populateComboBox(); //System.out.println(comboBoxData);\
+        comboBoxData = populateComboBox();
         comboBox.setItems(comboBoxData);
         
         // Define rendering of the list of values in ComboBox drop down. 
@@ -68,9 +71,7 @@ public class EliteHUDCustomizer extends Application {;
         
         // Handle ComboBox event.
         comboBox.setOnAction((event) -> {
-            Profile selectedProfile = (Profile) comboBox.getSelectionModel().getSelectedItem();
-            // System.out.println("ComboBox Action (selected: " + selectedProfile.getTitle() + ")");
-            
+            Profile selectedProfile = (Profile) comboBox.getSelectionModel().getSelectedItem();            
             
         });
 
@@ -102,13 +103,34 @@ public class EliteHUDCustomizer extends Application {;
         Button openBtn = new Button();
         Button defaultBtn = new Button();
         Button activateBtn = new Button();
+        Button createBtn = new Button();
+        
+        createBtn.setText("Create GraphicsConfiguration.xml here");
+        createBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    resetProfile("GraphicsConfiguration.xml");
+                    cleanXml("GraphicsConfiguration.xml");
+                    JOptionPane.showMessageDialog(null, "Default GrapicsConfiguration.xml created in current directory.\n"
+                            + "Copy this file into \"\\$Installation Folder\\EDLaunch\\Products\\FORC-FDEV-D-1002\"",
+                            "Message", JOptionPane.INFORMATION_MESSAGE);
+                }
+                catch (Exception e) {                    
+                    JOptionPane.showMessageDialog(null, "Unknown Error Occurred", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
         
         defaultBtn.setText("Defaults");
         defaultBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 try {
+                    if (filePath.length() == 0)
+                        throw new FileNotFoundException();
                     resetProfile(filePath.toString());
+                    cleanXml(filePath.toString());
                     JOptionPane.showMessageDialog(null, "Defaults Restored!", "Message", JOptionPane.INFORMATION_MESSAGE);
                 }
                 
@@ -126,11 +148,17 @@ public class EliteHUDCustomizer extends Application {;
             @Override
             public void handle(ActionEvent event) {
                 try {   
+                    if (filePath.length() == 0)
+                        throw new FileNotFoundException();
                     resetProfile(filePath.toString());
                     Profile selectedProfile = (Profile) comboBox.getSelectionModel().getSelectedItem();
-                    //System.out.println(selectedProfile.getXml());
                     setProfile(filePath.toString(), selectedProfile.getXml());
+                    cleanXml(filePath.toString());
                     JOptionPane.showMessageDialog(null, "Profile Activated!", "Message", JOptionPane.INFORMATION_MESSAGE);
+                    /*System.out.println(selectedProfile.getXml());
+                    System.out.println(filePath.toString());
+                    File file = new File(filePath.toString());
+                    System.out.println(file.exists());*/
                 }
                 
                 catch (Exception e) {
@@ -162,24 +190,36 @@ public class EliteHUDCustomizer extends Application {;
                 }
             });
         
-        // initialize text fields
-        
-        // initialize drop down chooser
-        
         
         // initialize GridPane layout
         GridPane grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.TOP_LEFT);
-        grid.setHgap(10);
+        grid.setHgap(25);
         grid.setVgap(25);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        grid.add(fileChooserLabel, 0, 0, 3, 1);
-        grid.add(openBtn, 4, 0);
+        grid.add(fileChooserLabel, 0, 0, 1, 1);
+        grid.add(openBtn, 1, 0);
         
-        grid.add(defaultBtn, 0, 2);
-        grid.add(comboBox, 2, 2);
-        grid.add(activateBtn, 4, 2);
+        grid.add(createBtn, 0, 1);
+        grid.add(defaultBtn, 1, 1);
+        
+        
+        grid.add(comboBox, 0, 2, 1, 1);
+        grid.add(activateBtn, 1, 2);
+        
+        
+        // center all elements       
+        GridPane.setHalignment(fileChooserLabel, HPos.CENTER);
+        GridPane.setHalignment(createBtn, HPos.CENTER);        
+        GridPane.setHalignment(openBtn, HPos.CENTER);
+        GridPane.setHalignment(defaultBtn, HPos.CENTER);
+        GridPane.setHalignment(activateBtn, HPos.CENTER);
+        GridPane.setHalignment(comboBox, HPos.CENTER);
+        createBtn.setTextAlignment(TextAlignment.CENTER);
+        
+        
+        grid.setGridLinesVisible(false);
         
         Scene scene = new Scene(grid);
         
@@ -287,68 +327,108 @@ public class EliteHUDCustomizer extends Application {;
         }
     }
     
-    private void resetProfile(String path) throws java.io.IOException {
-        //System.out.println(path);
+    private void resetProfile(String path) throws Exception {
         File file = new File(path);
-        Scanner scanner = new Scanner(file);
-        StringBuilder buffer = new StringBuilder();
-        while(scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            //System.out.println(line);
-            if(line.equals("<GUIColour>")) {
-                buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
-                buffer.append("            <MatrixRed> 1, 0, 0 </MatrixRed>\n");
-                buffer.append("            <MatrixGreen> 0, 1, 0 </MatrixGreen>\n");
-                buffer.append("            <MatrixBlue> 0, 0, 1 </MatrixBlue>\n");
-                buffer.append("    </Default>\n");
-                buffer.append("</GUIColour>");
-                while(!line.contains("</GUIColour>")) {
-                    line = scanner.nextLine();
-                    //System.out.println(line);
-                }
-                   
-            }
-            else
-                buffer.append(line);
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(null, "No config file found, creating default in current directory..."
+                , "Warning:", JOptionPane.INFORMATION_MESSAGE);
+            file = new File("GraphicsConfiguration.xml");
+            FileWriter printer = new FileWriter(file);
+            printer.write(XmlFormatter.defaults);
+            printer.close();
         }
-        scanner.close();
-        FileWriter printer = new FileWriter(path);
-        printer.write(buffer.toString());
-        printer.close();
+        else {            
+            cleanXml(path);
+            Scanner scanner = new Scanner(file);
+            StringBuilder buffer = new StringBuilder();
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if(line.contains("<GUIColour>")) {
+                    buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
+                    buffer.append("            <MatrixRed> 1, 0, 0 </MatrixRed>\n");
+                    buffer.append("            <MatrixGreen> 0, 1, 0 </MatrixGreen>\n");
+                    buffer.append("            <MatrixBlue> 0, 0, 1 </MatrixBlue>\n");
+                    buffer.append("    </Default>\n");
+                    buffer.append("</GUIColour>");
+                    while(!line.contains("</GUIColour>")) {
+                        line = scanner.nextLine();
+                    }
+
+                }
+                else
+                    buffer.append(line);
+            }
+            scanner.close();
+            FileWriter printer = new FileWriter(path);
+            printer.write(buffer.toString());
+            printer.close();
+        }
+
+    }
+    
+    private void setProfile(String path, String xml) throws Exception {
+        File file = new File(path);
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(null, "No config file found, creating default in current directory..."
+                , "Warning:", JOptionPane.INFORMATION_MESSAGE);
+            file = new File("GraphicsConfiguration.xml");
+            FileWriter printer = new FileWriter(file);
+            printer.write(XmlFormatter.defaults);
+            printer.close();
+        }
+        
+        
+        else {
+            cleanXml(path);
+            Scanner scanner = new Scanner(file);
+            StringBuilder buffer = new StringBuilder();
+
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if(line.contains("<GUIColour>")) {
+                    buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
+                    buffer.append("            " + xml + "\n");
+                    buffer.append("    </Default>\n");
+                    buffer.append("</GUIColour>");
+                    while(!line.contains("</GUIColour>")) {
+                        line = scanner.nextLine();
+                    }
+
+                }
+                else
+                    buffer.append(line);
+            }
+            scanner.close();
+            FileWriter printer = new FileWriter(path);
+            printer.write(buffer.toString());
+            printer.close();
+        }
         
     }
     
-    private void setProfile(String path, String xml) throws java.io.IOException {
-        System.out.println(path);
-        System.out.println(xml);
+    public void cleanXml(String path) throws Exception {
         File file = new File(path);
-        Scanner scanner = new Scanner(file);
-        StringBuilder buffer = new StringBuilder();
-        //System.out.println(path);
-        
-        while(scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            //System.out.println(line);
-            if(line.equals("<GUIColour>")) {
-                buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
-                buffer.append("            " + xml + "\n");
-                buffer.append("    </Default>\n");
-                buffer.append("</GUIColour>");
-                while(!line.contains("</GUIColour>")) {
-                    line = scanner.nextLine();
-                    //System.out.println(line);
-                }
-                   
-            }
-            else
-                buffer.append(line);
+        if (!file.exists()) {
+            JOptionPane.showMessageDialog(null, "No config file found, creating default in current directory..."
+                , "Warning:", JOptionPane.INFORMATION_MESSAGE);
+            throw new FileNotFoundException();
         }
-        scanner.close();
-        FileWriter printer = new FileWriter(path);
-        printer.write(buffer.toString());
-        printer.close();
         
-        
+        else {
+            Scanner scanner = new Scanner(file);
+            StringBuilder buffer = new StringBuilder();
+
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                buffer.append(line);
+            }
+                
+            scanner.close();
+            
+            FileWriter printer = new FileWriter(path);
+            printer.write(new XmlFormatter().format(buffer.toString()));
+            printer.close();
+        }
     }
     
 }
