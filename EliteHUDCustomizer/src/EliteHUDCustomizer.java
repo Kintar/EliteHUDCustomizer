@@ -11,11 +11,13 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import java.io.File;
 import javax.swing.JOptionPane;
+import java.util.ArrayList;
 
 
 /**
@@ -27,6 +29,7 @@ public class EliteHUDCustomizer extends Application {
     @Override
     public void start(Stage primaryStage) {
         // initialize file chooser
+        Label fileChooserLabel = new Label("Select your GraphicsConfiguration.xml");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select your GraphicsConfiguration.xml File"); 
                 // i.e.  "C:\Users[username]\AppData\Local\Frontier_Developments\Products\FORC-FDEV-D-1002"
@@ -45,7 +48,8 @@ public class EliteHUDCustomizer extends Application {
                 }
                 
                 catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, e.toString(), "Error:", JOptionPane.ERROR_MESSAGE);
+                        String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
+                        JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -55,12 +59,13 @@ public class EliteHUDCustomizer extends Application {
             
             @Override
             public void handle(ActionEvent event) {
-                try {
+                try {   
                     JOptionPane.showMessageDialog(null, "Profile Activated!", "Message", JOptionPane.INFORMATION_MESSAGE);
                 }
                 
                 catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, e.toString(), "Error:", JOptionPane.ERROR_MESSAGE);
+                        String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
+                        JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -72,9 +77,13 @@ public class EliteHUDCustomizer extends Application {
                 public void handle(final ActionEvent event) {
                     try {
                         File xml = fileChooser.showOpenDialog(primaryStage);
+                        if(!xml.getName().equals("GraphicsConfiguration.xml")) 
+                            throw new java.io.IOException();
+                        else fileChooserLabel.setText("GraphicsConfiguration.xml found!");
                     }
                     catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, e.toString(), "Error:", JOptionPane.ERROR_MESSAGE);
+                        String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
+                        JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
@@ -86,15 +95,18 @@ public class EliteHUDCustomizer extends Application {
         
         // initialize GridPane layout
         GridPane grid = new GridPane();
-        grid.setAlignment(javafx.geometry.Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        // grid.setPadding(new Insets(25, 25, 25, 25));
-        grid.add(openBtn, 1, 0);
-        grid.add(defaultBtn, 0, 2);
-        grid.add(activateBtn, 1, 2);
+        grid.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+        grid.setHgap(25);
+        grid.setVgap(25);
+        grid.setPadding(new Insets(25, 25, 25, 25));
         
-        Scene scene = new Scene(grid, 300, 100);
+        grid.add(fileChooserLabel, 0, 0);
+        grid.add(openBtn, 2, 0);
+        
+        grid.add(defaultBtn, 0, 2);
+        grid.add(activateBtn, 2, 2);
+        
+        Scene scene = new Scene(grid);
         
         primaryStage.setTitle("Elite HUD Customizer");
         primaryStage.setScene(scene);
