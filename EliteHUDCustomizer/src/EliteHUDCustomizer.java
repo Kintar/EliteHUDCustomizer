@@ -16,6 +16,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import java.io.File;
+import java.io.FileWriter;
 import javax.swing.JOptionPane;
 import java.util.Scanner;
 import javafx.collections.FXCollections;
@@ -35,6 +36,9 @@ public class EliteHUDCustomizer extends Application {;
     
     @Override
     public void start(Stage primaryStage) {
+        // object representing the absolute file path of the GraphicsConfiguration.xml file
+        StringBuffer filePath = new StringBuffer();
+        
         // sort the profiles in profiles.cfg for use in the dropdown menu
         ProfileSorter sorter = new ProfileSorter();
         sorter.sortProfiles();
@@ -57,6 +61,14 @@ public class EliteHUDCustomizer extends Application {;
                     }
                 }
             };
+        });
+        
+        // Handle ComboBox event.
+        comboBox.setOnAction((event) -> {
+            Profile selectedProfile = (Profile) comboBox.getSelectionModel().getSelectedItem();
+            // System.out.println("ComboBox Action (selected: " + selectedProfile.getTitle() + ")");
+            
+            
         });
 
         // Define rendering of selected value shown in ComboBox.
@@ -93,6 +105,7 @@ public class EliteHUDCustomizer extends Application {;
             @Override
             public void handle(ActionEvent event) {
                 try {
+                    resetProfile(filePath.toString());
                     JOptionPane.showMessageDialog(null, "Defaults Restored!", "Message", JOptionPane.INFORMATION_MESSAGE);
                 }
                 
@@ -110,6 +123,10 @@ public class EliteHUDCustomizer extends Application {;
             @Override
             public void handle(ActionEvent event) {
                 try {   
+                    resetProfile(filePath.toString());
+                    Profile selectedProfile = (Profile) comboBox.getSelectionModel().getSelectedItem();
+                    //System.out.println(selectedProfile.getXml());
+                    setProfile(filePath.toString(), selectedProfile.getXml());
                     JOptionPane.showMessageDialog(null, "Profile Activated!", "Message", JOptionPane.INFORMATION_MESSAGE);
                 }
                 
@@ -131,6 +148,8 @@ public class EliteHUDCustomizer extends Application {;
                         if(!xml.getName().equals("GraphicsConfiguration.xml")) 
                             throw new java.io.IOException();
                         else fileChooserLabel.setText("Configuration found!");
+                        filePath.delete(0, filePath.length());
+                        filePath.append(xml.getAbsolutePath());
                     }
                     catch (Exception e) {
                         fileChooserLabel.setText("Select your GraphicsConfiguration.xml");
@@ -190,6 +209,70 @@ public class EliteHUDCustomizer extends Application {;
         }
         
         return null;
+    }
+    
+    private void resetProfile(String path) throws java.io.IOException {
+        //System.out.println(path);
+        File file = new File(path);
+        Scanner scanner = new Scanner(file);
+        StringBuilder buffer = new StringBuilder();
+        while(scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            //System.out.println(line);
+            if(line.equals("<GUIColour>")) {
+                buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
+                buffer.append("            <MatrixRed> 1, 0, 0 </MatrixRed>\n");
+                buffer.append("            <MatrixGreen> 0, 1, 0 </MatrixGreen>\n");
+                buffer.append("            <MatrixBlue> 0, 0, 1 </MatrixBlue>\n");
+                buffer.append("    </Default>\n");
+                buffer.append("</GUIColour>");
+                while(!line.contains("</GUIColour>")) {
+                    line = scanner.nextLine();
+                    //System.out.println(line);
+                }
+                   
+            }
+            else
+                buffer.append(line);
+        }
+        scanner.close();
+        FileWriter printer = new FileWriter(path);
+        printer.write(buffer.toString());
+        printer.close();
+        
+    }
+    
+    private void setProfile(String path, String xml) throws java.io.IOException {
+        System.out.println(path);
+        System.out.println(xml);
+        File file = new File(path);
+        Scanner scanner = new Scanner(file);
+        StringBuilder buffer = new StringBuilder();
+        //System.out.println(path);
+        
+        while(scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            //System.out.println(line);
+            if(line.equals("<GUIColour>")) {
+                buffer.append("<GUIColour>\n    <Default>\n        <LocalisationName>Standard</LocalisationName>\n");
+                buffer.append("            " + xml + "\n");
+                buffer.append("    </Default>\n");
+                buffer.append("</GUIColour>");
+                while(!line.contains("</GUIColour>")) {
+                    line = scanner.nextLine();
+                    //System.out.println(line);
+                }
+                   
+            }
+            else
+                buffer.append(line);
+        }
+        scanner.close();
+        FileWriter printer = new FileWriter(path);
+        printer.write(buffer.toString());
+        printer.close();
+        
+        
     }
     
 }

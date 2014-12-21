@@ -1,0 +1,9 @@
+<GUIColour> 
+	<Default> 
+		<LocalisationName>Standard</LocalisationName> 
+			<MatrixRed> 1, 0, 0 </MatrixRed>
+			<MatrixGreen> 0, 1, 0 </MatrixGreen>
+			<MatrixBlue> 0, 0, 1 </MatrixBlue>
+	</Default> 
+</GUIColour>
+
