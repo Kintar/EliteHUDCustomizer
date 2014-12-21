@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package elitehudcustomizer;
+
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -17,21 +17,70 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import java.io.File;
 import javax.swing.JOptionPane;
-import java.util.ArrayList;
+import java.util.Scanner;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.util.StringConverter;
 
 
 /**
  *
  * @author ty
  */
-public class EliteHUDCustomizer extends Application {
+@SuppressWarnings("unchecked")
+public class EliteHUDCustomizer extends Application {;
+    private ObservableList<Profile> comboBoxData = FXCollections.observableArrayList();
     
     @Override
     public void start(Stage primaryStage) {
+        // sort the profiles in profiles.cfg for use in the dropdown menu
+        ProfileSorter sorter = new ProfileSorter();
+        sorter.sortProfiles();
+        // initialize drop down menu
+        ComboBox comboBox = new ComboBox(comboBoxData);
+        comboBoxData = populateComboBox(); //System.out.println(comboBoxData);\
+        comboBox.setItems(comboBoxData);
+        
+        // Define rendering of the list of values in ComboBox drop down. 
+        comboBox.setCellFactory((anotherComboBox) -> {
+            return new ListCell<Profile> () {
+                @Override
+                protected void updateItem(Profile item, boolean empty) {
+                    super.updateItem(item, empty);
+
+                    if (item == null || empty) {
+                        setText(null);
+                    } else {
+                        setText(item.getTitle());
+                    }
+                }
+            };
+        });
+
+        // Define rendering of selected value shown in ComboBox.
+        comboBox.setConverter(new StringConverter <Profile> () {
+                    @Override
+                    public String toString(Profile item) {
+                        if (item == null) {
+                            return null;
+                        } else {
+                            return item.getTitle();
+                        }
+                    }
+                    
+                    @Override
+                    public Profile fromString(String profileString) {
+                        return null; // No conversion fromString needed.
+                    }
+        });
+        
+        
         // initialize file chooser
         Label fileChooserLabel = new Label("Select your GraphicsConfiguration.xml");
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select your GraphicsConfiguration.xml File"); 
+        fileChooser.setTitle("Select your GraphicsConfiguration.xml file"); 
                 // i.e.  "C:\Users[username]\AppData\Local\Frontier_Developments\Products\FORC-FDEV-D-1002"
         
         // initialize buttons
@@ -48,6 +97,7 @@ public class EliteHUDCustomizer extends Application {
                 }
                 
                 catch (Exception e) {
+                        fileChooserLabel.setText("Choose your GraphicsConfiguration.xml");
                         String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
                         JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                 }
@@ -64,13 +114,14 @@ public class EliteHUDCustomizer extends Application {
                 }
                 
                 catch (Exception e) {
+                        fileChooserLabel.setText("Select your GraphicsConfiguration.xml");
                         String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
                         JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         
-        openBtn.setText("Open");
+        openBtn.setText("Browse");
         openBtn.setOnAction(
             new EventHandler<ActionEvent>() {
                 @Override
@@ -79,9 +130,10 @@ public class EliteHUDCustomizer extends Application {
                         File xml = fileChooser.showOpenDialog(primaryStage);
                         if(!xml.getName().equals("GraphicsConfiguration.xml")) 
                             throw new java.io.IOException();
-                        else fileChooserLabel.setText("GraphicsConfiguration.xml found!");
+                        else fileChooserLabel.setText("Configuration found!");
                     }
                     catch (Exception e) {
+                        fileChooserLabel.setText("Select your GraphicsConfiguration.xml");
                         String errorText = "Make sure you chose your GraphicsConfiguration.xml file!";
                         JOptionPane.showMessageDialog(null, errorText, "Error:", JOptionPane.ERROR_MESSAGE);
                     }
@@ -96,15 +148,16 @@ public class EliteHUDCustomizer extends Application {
         // initialize GridPane layout
         GridPane grid = new GridPane();
         grid.setAlignment(javafx.geometry.Pos.TOP_LEFT);
-        grid.setHgap(25);
+        grid.setHgap(10);
         grid.setVgap(25);
         grid.setPadding(new Insets(25, 25, 25, 25));
         
-        grid.add(fileChooserLabel, 0, 0);
-        grid.add(openBtn, 2, 0);
+        grid.add(fileChooserLabel, 0, 0, 3, 1);
+        grid.add(openBtn, 4, 0);
         
         grid.add(defaultBtn, 0, 2);
-        grid.add(activateBtn, 2, 2);
+        grid.add(comboBox, 2, 2);
+        grid.add(activateBtn, 4, 2);
         
         Scene scene = new Scene(grid);
         
@@ -113,12 +166,30 @@ public class EliteHUDCustomizer extends Application {
         primaryStage.setResizable(false);
         primaryStage.show();
     }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
+    
+    private ObservableList<Profile> populateComboBox ()  {
+        try {
+            ObservableList<Profile> list = FXCollections.observableArrayList();
+            File file = new File("profiles.cfg");
+            if(!file.exists()) throw new java.io.IOException();
+            
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNextLine()) {
+                list.add(new Profile(scanner.nextLine(), scanner.nextLine()));
+            }
+            return list;
+        }
+        
+        catch (Exception e) {
+            String errorText = "profiles.cfg must be present!";
+            JOptionPane.showMessageDialog(null, errorText, "Fatal Error:", JOptionPane.ERROR_MESSAGE);
+                    try { 
+            Thread.sleep(5000); }
+                    catch (Exception e2) {}
+            System.exit(1);
+        }
+        
+        return null;
     }
     
 }
