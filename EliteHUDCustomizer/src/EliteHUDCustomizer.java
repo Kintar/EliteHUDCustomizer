@@ -26,6 +26,7 @@ import javafx.geometry.HPos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
 
 
@@ -52,6 +53,7 @@ public class EliteHUDCustomizer extends Application {;
         ComboBox comboBox = new ComboBox(comboBoxData);
         comboBoxData = populateComboBox();
         comboBox.setItems(comboBoxData);
+        comboBox.setPromptText("Choose a theme...");
         
         // Define rendering of the list of values in ComboBox drop down. 
         comboBox.setCellFactory((anotherComboBox) -> {
@@ -105,19 +107,35 @@ public class EliteHUDCustomizer extends Application {;
         Button activateBtn = new Button();
         Button createBtn = new Button();
         
-        createBtn.setText("Create GraphicsConfiguration.xml here");
+        createBtn.setText("Create default GraphicsConfiguration.xml");
         createBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 try {
-                    resetProfile("GraphicsConfiguration.xml");
-                    cleanXml("GraphicsConfiguration.xml");
-                    JOptionPane.showMessageDialog(null, "Default GrapicsConfiguration.xml created in current directory.\n"
-                            + "Copy this file into \"\\$Installation Folder\\EDLaunch\\Products\\FORC-FDEV-D-1002\"",
-                            "Message", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Browse to \"$Install Folder\\Frontier\\EDLaunch\\Products\\FORC-FDEV-D-1002\"", "Message", JOptionPane.INFORMATION_MESSAGE);
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    directoryChooser.setTitle("Browse to \"$Install Folder\\Frontier\\EDLaunch\\Products\\FORC-FDEV-D-1002\"");
+                    File file = directoryChooser.showDialog(primaryStage);
+                    if (!file.isDirectory()) throw new java.io.FileNotFoundException();
+                    if (!file.exists()) throw new java.io.FileNotFoundException();
+                    
+                    filePath.delete(0, filePath.length());
+                    filePath.append(file.getAbsolutePath()).append("/GraphicsConfiguration.xml");
+                     
+                    file = new File(filePath.toString());
+                    file.createNewFile();
+                    
+                    FileWriter printer = new FileWriter(file);
+                    printer.write(XmlFormatter.defaults);
+                    printer.close();
+                    
+                    resetProfile(filePath.toString());
+                    cleanXml(filePath.toString());
+                    JOptionPane.showMessageDialog(null, "Default GraphicsConfiguration.xml created in chosen directory", "Message", JOptionPane.INFORMATION_MESSAGE);
                 }
-                catch (Exception e) {                    
-                    JOptionPane.showMessageDialog(null, "Unknown Error Occurred", "Error", JOptionPane.ERROR_MESSAGE);
+                catch (Exception e) {  
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Error Occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -155,10 +173,6 @@ public class EliteHUDCustomizer extends Application {;
                     setProfile(filePath.toString(), selectedProfile.getXml());
                     cleanXml(filePath.toString());
                     JOptionPane.showMessageDialog(null, "Profile Activated!", "Message", JOptionPane.INFORMATION_MESSAGE);
-                    /*System.out.println(selectedProfile.getXml());
-                    System.out.println(filePath.toString());
-                    File file = new File(filePath.toString());
-                    System.out.println(file.exists());*/
                 }
                 
                 catch (Exception e) {
@@ -330,12 +344,7 @@ public class EliteHUDCustomizer extends Application {;
     private void resetProfile(String path) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
-            JOptionPane.showMessageDialog(null, "No config file found, creating default in current directory..."
-                , "Warning:", JOptionPane.INFORMATION_MESSAGE);
-            file = new File("GraphicsConfiguration.xml");
-            FileWriter printer = new FileWriter(file);
-            printer.write(XmlFormatter.defaults);
-            printer.close();
+            throw new FileNotFoundException();
         }
         else {            
             cleanXml(path);
@@ -409,8 +418,6 @@ public class EliteHUDCustomizer extends Application {;
     public void cleanXml(String path) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
-            JOptionPane.showMessageDialog(null, "No config file found, creating default in current directory..."
-                , "Warning:", JOptionPane.INFORMATION_MESSAGE);
             throw new FileNotFoundException();
         }
         
