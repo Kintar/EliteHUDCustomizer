@@ -40,8 +40,11 @@ public class EliteHUDCustomizer extends Application {;
         StringBuffer filePath = new StringBuffer();
         
         // sort the profiles in profiles.cfg for use in the dropdown menu
-        ProfileSorter sorter = new ProfileSorter();
-        sorter.sortProfiles();
+        if(new File("profiles.cfg").exists()) {
+            ProfileSorter sorter = new ProfileSorter();
+            sorter.sortProfiles();
+        }
+        
         // initialize drop down menu
         ComboBox comboBox = new ComboBox(comboBoxData);
         comboBoxData = populateComboBox(); //System.out.println(comboBoxData);\
@@ -200,15 +203,88 @@ public class EliteHUDCustomizer extends Application {;
         }
         
         catch (Exception e) {
-            String errorText = "profiles.cfg must be present!";
-            JOptionPane.showMessageDialog(null, errorText, "Fatal Error:", JOptionPane.ERROR_MESSAGE);
-                    try { 
-            Thread.sleep(5000); }
-                    catch (Exception e2) {}
-            System.exit(1);
+            try{
+            FileWriter printer = new FileWriter("profiles.cfg");
+            String profiles = "80's Revival Purple\n" +
+            "<MatrixRed> 0.3, 0.3, 1 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Baron's Blue\n" +
+            "<MatrixRed> 0, 0.33, 0.75 </MatrixRed> <MatrixGreen> 0, 1, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Beige\n" +
+            "<MatrixRed> .33, .11, 0 </MatrixRed> <MatrixGreen> 1, 1, 1 </MatrixGreen> <MatrixBlue> 1, 1, 1 </MatrixBlue>\n" +
+            "Black\n" +
+            "<MatrixRed> 0, 0, 0 </MatrixRed> <MatrixGreen> 0, 0, 0 </MatrixGreen> <MatrixBlue> 1, 1, 1 </MatrixBlue>\n" +
+            "Blue with Purple Accents\n" +
+            "<MatrixRed> 0.03, 0.1, 1 </MatrixRed> <MatrixGreen> 0.4, 1.25, 0.2 </MatrixGreen> <MatrixBlue> 1, -1.25, 0.3 </MatrixBlue>\n" +
+            "Blue with Red Accents\n" +
+            "<MatrixRed> 0, 0.33, 0.75 </MatrixRed> <MatrixGreen> 0.6, 0, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Blue with Red and Yellow Accents\n" +
+            "<MatrixRed> -1, 0.51, 0.99 </MatrixRed> <MatrixGreen> 1, -1, -0.26 </MatrixGreen> <MatrixBlue> 1, 0.29, -1 </MatrixBlue>\n" +
+            "Blue with White and Yellow Accents\n" +
+            "<MatrixRed> 0, 0, 1 </MatrixRed> <MatrixGreen> 0, 1, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Bright Blue with White and Yellow Accents\n" +
+            "<MatrixRed> 0, 0.5, 1 </MatrixRed> <MatrixGreen> 0, 0.5, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Bright Green with Red and Yellow Accents\n" +
+            "<MatrixRed> 0, 1, 0 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 0, 1 </MatrixBlue>\n" +
+            "Cool Blue\n" +
+            "<MatrixRed> 0.21, 0.29, 0.93 </MatrixRed> <MatrixGreen> 0, 1, 0 </MatrixGreen> <MatrixBlue> 1, 1, 1 </MatrixBlue>\n" +
+            "Fade to Grey\n" +
+            "<MatrixRed> 0.2, 0.2, 0.5 </MatrixRed> <MatrixGreen> 0.4, 0.2, 0.3 </MatrixGreen> <MatrixBlue> 0.4, 0.2, 0.3 </MatrixBlue>\n" +
+            "Ghost\n" +
+            "<MatrixRed> 0.0, 0.3, 0.5 </MatrixRed> <MatrixGreen> 0, 0, 0.2 </MatrixGreen> <MatrixBlue> 0.2, 0, 0 </MatrixBlue>\n" +
+            "Green Venom\n" +
+            "<MatrixRed> 0, 0.3, 0 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 0.3, 0 </MatrixBlue>\n" +
+            "Green with Pink\n" +
+            "<MatrixRed> 0, 1, 0 </MatrixRed> <MatrixGreen> 0.5, 0, 0 </MatrixGreen> <MatrixBlue> 0.5, 0, 1 </MatrixBlue>\n" +
+            "Green with Yellow Accents\n" +
+            "<MatrixRed> 0, 3, 0 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 3, 0 </MatrixBlue>\n" +
+            "Hot Pink\n" +
+            "<MatrixRed> 1, 0, 0.33 </MatrixRed> <MatrixGreen> 1, 1, 1 </MatrixGreen> <MatrixBlue> 0.33, 0, 1 </MatrixBlue>\n" +
+            "Jaded\n" +
+            "<MatrixRed> 0.2, 0.5, 0.2 </MatrixRed> <MatrixGreen> 0.3, 0.2, 0.4 </MatrixGreen> <MatrixBlue> 0.3, 0.2, 0.4 </MatrixBlue>\n" +
+            "Light Blue with White\n" +
+            "<MatrixRed> 0, 0.4, 0.7 </MatrixRed> <MatrixGreen> -1, -1, -1 </MatrixGreen> <MatrixBlue> 1, 1, 1 </MatrixBlue>\n" +
+            "Light Blue with White and Purple Accents\n" +
+            "<MatrixRed> 0, 1, 1 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 0, 1 </MatrixBlue>\n" +
+            "Light Green\n" +
+            "<MatrixRed> 0.69, 1, 0.15 </MatrixRed> <MatrixGreen> 0, 1, 0 </MatrixGreen> <MatrixBlue> 0, 0, 0.15 </MatrixBlue>\n" +
+            "Medium Blue with White Accents\n" +
+            "<MatrixRed> 0, 4, 7 </MatrixRed> <MatrixGreen> -1.0, -1.0, -1.0 </MatrixGreen> <MatrixBlue> 0, 0, 1 </MatrixBlue>\n" +
+            "Medium Green with Blue Accents\n" +
+            "<MatrixRed> 0, 0.5, 0 </MatrixRed> <MatrixGreen> 0, 0, 1 </MatrixGreen> <MatrixBlue> 0.1, 0.1, 0 </MatrixBlue>\n" +
+            "Medium Green with Pink and Purple Accents \n" +
+            "<MatrixRed> 0, 0.5, 0 </MatrixRed> <MatrixGreen> 0, 0, 1 </MatrixGreen> <MatrixBlue> 0.5, 0, 0 </MatrixBlue>\n" +
+            "Nightvision Green\n" +
+            "<MatrixRed> 0.31, 0.75, 0.1 </MatrixRed> <MatrixGreen> 0.5, 0.5, 1 </MatrixGreen> <MatrixBlue> 0, 0, 1 </MatrixBlue>\n" +
+            "Pink with White Accents\n" +
+            "<MatrixRed> 1, 0, 0.42 </MatrixRed> <MatrixGreen> 1, 0.17, 1 </MatrixGreen> <MatrixBlue> 0.63, 1, 1 </MatrixBlue>\n" +
+            "Pure White with Blue Accents\n" +
+            "<MatrixRed> 1, 1, 1 </MatrixRed> <MatrixGreen> -1, -1, 1 </MatrixGreen> <MatrixBlue> 0, 0, 1 </MatrixBlue>\n" +
+            "Purple Haze\n" +
+            "<MatrixRed> 0, 0, 0.5 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 0.5, 0 </MatrixBlue>\n" +
+            "Purple with White and Yellow Accents\n" +
+            "<MatrixRed> 0, 0, 5 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 5, 0 </MatrixBlue>\n" +
+            "Red\n" +
+            "<MatrixRed> 1, 0, 0 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 0, 0, 0 </MatrixBlue>\n" +
+            "Retro Gamer\n" +
+            "<MatrixRed> 0.2, 1, 0 </MatrixRed> <MatrixGreen> 1, 0, 0 </MatrixGreen> <MatrixBlue> 1, 0, 0 </MatrixBlue>\n" +
+            "Sunset Blast\n" +
+            "<MatrixRed> 1, 0, 0 </MatrixRed> <MatrixGreen> 0.5, 0.7, 0 </MatrixGreen> <MatrixBlue> 0, 0, 0.1 </MatrixBlue>\n" +
+            "White\n" +
+            "<MatrixRed> 0.42, 0.42, 0.42 </MatrixRed> <MatrixGreen> 0.84, 0.84, 0.84 </MatrixGreen> <MatrixBlue> 0.21, 0.21, 0.21 </MatrixBlue>\n" +
+            "";
+            printer.write(profiles);
+            printer.close();
+            ObservableList<Profile> list = FXCollections.observableArrayList();
+            File file = new File("profiles.cfg");
+            if(!file.exists()) throw new java.io.IOException();
+            
+            Scanner scanner = new Scanner(file);
+            while(scanner.hasNextLine()) {
+                list.add(new Profile(scanner.nextLine(), scanner.nextLine()));
+            }
+            return list;
+            }catch(Exception e2){return null;}
         }
-        
-        return null;
     }
     
     private void resetProfile(String path) throws java.io.IOException {
